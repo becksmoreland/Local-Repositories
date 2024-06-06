@@ -1,14 +1,15 @@
+// src/App.js
 import React from 'react';
 import './App.css';
+import Navbar from './components/navbar';
+import Form from './components/form';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>Berkeley High Credit Tool</h1>
-      </header>
+      <Navbar />
       <main>
-        <p>Frontend starts here!</p>
+        <Form />
       </main>
     </div>
   );
