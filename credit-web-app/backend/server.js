@@ -4,21 +4,52 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = 5000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const mongoURI = 'mongodb+srv://becksmoreland:GoJackets@cluster0.2fhr7lb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+// MongoDB Atlas connection string
+const mongoURI = 'mongodb+srv://becksmoreland:GoJackets@cluster0.2fhr7lb.mongodb.net/MongoDB?retryWrites=true&w=majority';
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// Connect to MongoDB Atlas
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('MongoDB Connected');
+}).catch(err => {
+  console.error('Error connecting to MongoDB:', err);
+});
 
-// Import routes
-const classesRoutes = require('./routes/classes');
-app.use('/api/classes', classesRoutes);
+// Define a schema and model
+const classSchema = new mongoose.Schema({
+  Class: String,
+  CreditType: String,
+  CreditAmount: String,
+  Grade: String
+});
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Adjust getModel function to match your database structure
+const getModel = (community) => {
+  // Dynamically create a model for each community
+  return mongoose.model(`BHSClassData${community}`, classSchema, `BHSClassData${community}`);
+};
+
+// Route to fetch all classes for a community
+app.get('/api/classes/:community', async (req, res) => {
+  const { community } = req.params;
+  const ClassModel = getModel(community);
+  try {
+    const classes = await ClassModel.find({});
+    res.json(classes);
+  } catch (error) {
+    console.error('Error fetching classes:', error);
+    res.status(500).json({ error: 'Failed to fetch classes' });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
